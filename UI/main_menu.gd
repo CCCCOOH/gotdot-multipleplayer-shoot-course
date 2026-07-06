@@ -18,7 +18,7 @@ func _ready() -> void:
 	host_button.pressed.connect(_on_host_pressed)
 	join_button.pressed.connect(_on_join_pressed)
 	# 没有一个玩家连接该信号就会发送玩家的ID作为参数
-	multiplayer.peer_connected.connect(_on_peer_connected)
+	multiplayer.connected_to_server.connect(_on_connected_to_server)
 
 # Host按钮事件
 func _on_host_pressed() -> void: 
@@ -27,15 +27,12 @@ func _on_host_pressed() -> void:
 	server_peer.create_server(PORT)
 	multiplayer.multiplayer_peer = server_peer
 	get_tree().change_scene_to_packed(main_scene) # 通过get_tree()获取到包含当前场景的场景树将本场景树切换到main_scene所对应的场景树
-	
-# _下划线表示 private/私有方法，不应该从外部调用它
+
 func _on_join_pressed() -> void:
 	var client_peer := ENetMultiplayerPeer.new()
 	client_peer.create_client("127.0.0.1", PORT)
 	multiplayer.multiplayer_peer = client_peer
-	get_tree().change_scene_to_packed(main_scene)
-	
-# 需要再Debug中启用多个实例来进行调试 Debug -> Coustomize Run Instances
-func  _on_peer_connected(id: int) -> void: # id是peer连接信号发出的参数
-	print("peer connected! %s" % id) # id = 1始终是为服务器预留的，客户端的id是一个随机的整数
-	
+
+# 任何结点只有当连接到服务器时会切换场景
+func  _on_connected_to_server() -> void:
+		get_tree().change_scene_to_packed(main_scene)
